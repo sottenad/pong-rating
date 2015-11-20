@@ -1,0 +1,6 @@
+li .fa-close{
+    display:none;   
+}
+li:hover .fa-close{
+    display:inline-block;   
+}

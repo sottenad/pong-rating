@@ -1,0 +1,97 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+
+  <title>My Parse App</title>
+  <meta name="description" content="My Parse App">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-latest.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-debug.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.js"></script>
+    
+
+  <script src="options.js"></script>
+  <script src="main.js"></script>
+</head>
+
+<body class="container">
+  
+  <div id="main">
+    <div class="col-sm-3">
+      <a data-toggle="modal" data-target="#newPlayerModal">Add Player</a>
+        <div class="playerList">
+            <h2>Player Rankings</h2>
+            <span id="loadingPlayers" data-bind="if: allPlayers().length <= 0">Loading Players <i class="fa fa-spinner fa-spin"></i></span>
+            <ul data-bind="foreach: allPlayers()" class="list-group">
+                <li class="list-group-item">
+                    <span data-bind="text:name"></span> - 
+                    <span data-bind="text:currentRating"></span>
+                    <span data-bind="click: $parent.deletePlayer" class="fa fa-close pull-right"></span>
+                </li>
+            </ul>
+        </div>
+    </div>
+      
+    <div class="col-sm-9">
+        <h2>Game Results</h2>  
+        <form>
+            <div class="form-group">
+                <label>Opponent 1</label>
+                <select data-bind="options: allPlayers, optionsText: 'name', optionsValue:'name',  value: player1"></select>
+            </div>
+            <div class="form-group">
+                <label>Opponent 2</label>
+                <select data-bind="options: allPlayers, optionsText: 'name', optionsValue:'name', value: player2"></select>
+            </div>
+            <div class="form-group">
+                <label>Winner?</label>
+                <div class="winnerOptions">
+                    <span data-bind="text: player1"></span><input type="radio" name="winnerGroup" data-bind="value: player1, checked:winningPlayer" /><br /> 
+                    <span data-bind="text: player2"></span><input type="radio" name="winnerGroup" data-bind="value: player2, checked:winningPlayer" />
+                </div>
+            </div>
+            <div class="form-group">
+                <a class="btn btn-primary" data-bind="click: calculateRatings">Submit</a>
+            </div>
+        </form>
+    </div>
+  </div>
+    
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="newPlayerModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Create a Player</h4>
+          </div>
+          <div class="modal-body clearfix">
+            <div class="col-sm-12 ">
+                <form class="form-horizontal" data-bind="submit: createPlayer">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" placeholder="Username" data-bind="value: newPlayerName" id="playerName" />
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-bind="click: createPlayer">Create Player</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+</body>
+
+</html>
