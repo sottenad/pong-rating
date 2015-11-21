@@ -1,5 +1,6 @@
 Parse.initialize("Sy5q1XsECnF2Rb3CxIwD8TcaD89c846oK2lE9R6G", "NqWOFQQErjWfM9JECZdCeIaXsNtFjV2svwDokB3S");
 
+
 var Pong = window.Pong || {};
 
 window.Pong.User = function(){
@@ -11,13 +12,38 @@ window.Pong.User = function(){
         var self = this;
         var defaultScore = 1600;
         var Player = Parse.Object.extend('Player');
-        self.newPlayerName = ko.observable();
+        var Game = Parse.Object.extend('Game');
+      
         self.allPlayers = ko.observableArray([]);
+        self.allGames = ko.observableArray([]);
+      
+        self.newPlayerName = ko.observable();
         self.winningPlayer = ko.observable();
         self.player1 = ko.observable();
         self.player2 = ko.observable();
-        
+              
+        self.opponent1List = ko.computed(function () {
+          return ko.utils.arrayFilter(self.allPlayers(),
+            function (player) {
+              if (player.name().indexOf(self.player2()) < 0) return true;
+            }
+          )
+        })
+        self.opponent2List = ko.computed(function () {
+          return ko.utils.arrayFilter(self.allPlayers(),
+            function (player) {
+              if (player.name().indexOf(self.player1()) < 0) return true;
+            }
+          )
+        })
+           
+        self.sortFunction = function(a, b) {
+          return a.currentRating() < b.currentRating() ? 1 : -1;  
+        };
 
+        self.sortedPlayers = ko.computed(function() {
+            return this.allPlayers().sort(this.sortFunction);
+        }, self);
         
         self.calculateRatings = function(){
             //https://metinmediamath.wordpress.com/2013/11/27/how-to-calculate-the-elo-rating-including-example/
@@ -42,8 +68,8 @@ window.Pong.User = function(){
                 s2 = 1;
             }
             
-            var updatedP1Rating = Math.floor(p1Rating + k * (s1 - e1));
-            var updatedP2Rating = Math.floor(p2Rating + k * (s2 - e2));
+            var updatedP1Rating = Math.round(p1Rating + k * (s1 - e1));
+            var updatedP2Rating = Math.round(p2Rating + k * (s2 - e2));
             
             console.log(p1.name()+ ' - ' +updatedP1Rating, p2.name()+ ' - '+updatedP2Rating);
             
@@ -64,9 +90,8 @@ window.Pong.User = function(){
                   if(didWin){
                       toastr["success"](player.name() + " Wins! Ranking jumps to "+rating);
                   }
-                      var playerObj = ko.utils.arrayFirst(self.allPlayers(), function(item) {return player.name() === item.name();});
-                      playerObj.currentRating(rating);
-                  
+                  var playerObj = ko.utils.arrayFirst(self.allPlayers(), function(item) {return player.name() === item.name();});
+                  playerObj.currentRating(rating);
               },
               error: function(point, err) {
                 console.log('Error: '+err);
@@ -98,8 +123,8 @@ window.Pong.User = function(){
         };
         
         self.fetchAllPlayers = function(){
-            var model = this;
             var query = new Parse.Query(Player);
+            query.descending('currentRating');
             query.find({
               success: function(players) {
                 if(players.length > 0){
@@ -133,12 +158,46 @@ window.Pong.User = function(){
                 });   
             }
         }
+        
+        /* =============== Games =============== */
+        
+        self.fetchAllGames = function(){
+           var query = new Parse.Query(Game);
+           query.include('winner').include('loser');
+           query.descending("createdAt");
+           query.find({
+              success: function(games) {
+                if(games.length > 0){
+                   for(var i=0; i<games.length; i++){
+                      self.allGames.push(games[i].toJSON());
+                   }
+                }
+              },
+              error: function(object, error) {
+                // The object was not retrieved successfully.
+                console.log(error);
+              }
+            });   
+        }
+        
+        self.updatePlayerSelect = function(){
+            
+        }
+
+        
+        ko.bindingHandlers.formattedTime = {
+          update: function(element, valueAccessor) {
+            $(element).text(moment(ko.unwrap(valueAccessor())).format('MMM Do'));
+          }
+        };
+        
     }
     
     var init = function(){
         var pongModel = new pongVM();
         ko.applyBindings(pongModel);
         pongModel.fetchAllPlayers();
+        pongModel.fetchAllGames();
     }
     
     return {

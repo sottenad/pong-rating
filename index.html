@@ -16,6 +16,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-debug.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
     
 
   <script src="options.js"></script>
@@ -24,38 +25,35 @@
 
 <body class="container">
   
-  <div id="main">
-    <div class="col-sm-3">
-      <a data-toggle="modal" data-target="#newPlayerModal">Add Player</a>
-        <div class="playerList">
-            <h2>Player Rankings</h2>
-            <span id="loadingPlayers" data-bind="if: allPlayers().length <= 0">Loading Players <i class="fa fa-spinner fa-spin"></i></span>
-            <ul data-bind="foreach: allPlayers()" class="list-group">
-                <li class="list-group-item">
-                    <span data-bind="text:name"></span> - 
-                    <span data-bind="text:currentRating"></span>
-                    <span data-bind="click: $parent.deletePlayer" class="fa fa-close pull-right"></span>
-                </li>
-            </ul>
-        </div>
+  <nav class="navbar navbar-default navbar-fixed-top ">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">
+          Pong Rating
+        </a>
+      </div>
     </div>
-      
-    <div class="col-sm-9">
-        <h2>Game Results</h2>  
+  </nav>
+  
+  
+  <div id="main">
+    <div class="row">
+    <div class="col-sm-6 well">
+        <h2>Current Game</h2>  
         <form>
             <div class="form-group">
                 <label>Opponent 1</label>
-                <select data-bind="options: allPlayers, optionsText: 'name', optionsValue:'name',  value: player1"></select>
+                <select data-bind="options: opponent1List, optionsText: 'name', optionsValue:'name',  value: player1, event: {change: updatePlayerSelect}"></select>
             </div>
             <div class="form-group">
                 <label>Opponent 2</label>
-                <select data-bind="options: allPlayers, optionsText: 'name', optionsValue:'name', value: player2"></select>
+                <select data-bind="options: opponent2List, optionsText: 'name', optionsValue:'name', value: player2"></select>
             </div>
             <div class="form-group">
                 <label>Winner?</label>
                 <div class="winnerOptions">
-                    <span data-bind="text: player1"></span><input type="radio" name="winnerGroup" data-bind="value: player1, checked:winningPlayer" /><br /> 
-                    <span data-bind="text: player2"></span><input type="radio" name="winnerGroup" data-bind="value: player2, checked:winningPlayer" />
+                    <span data-bind="text: player1"></span> <input type="radio" name="winnerGroup" data-bind="value: player1, checked:winningPlayer" /><br /> 
+                    <span data-bind="text: player2"></span> <input type="radio" name="winnerGroup" data-bind="value: player2, checked:winningPlayer" />
                 </div>
             </div>
             <div class="form-group">
@@ -63,6 +61,31 @@
             </div>
         </form>
     </div>
+    
+    <div class="col-sm-3">
+      <div class="playerList">
+          <h2>Player Rankings</h2>
+          <span id="loadingPlayers" data-bind="if: sortedPlayers().length <= 0">Loading Players <i class="fa fa-spinner fa-spin"></i></span>
+          <ul data-bind="foreach: allPlayers()" class="list-group">
+              <li class="list-group-item">
+                  <span data-bind="text:name"></span> - 
+                  <span data-bind="text:currentRating"></span>
+                  <span data-bind="click: $parent.deletePlayer" class="fa fa-close pull-right"></span>
+              </li>
+          </ul>
+        <a data-toggle="modal" data-target="#newPlayerModal">Add Player</a>
+      </div>
+    </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <h2>Games</h2>
+        <ul data-bind="foreach: allGames">
+          <li><span data-bind="formattedTime: createdAt"></span> - <span data-bind="text: winner.name"></span> <small>(<span data-bind="text: winnerRating"></span>)</small> defeated <span data-bind="text: loser.name"></span> <small>(<span data-bind="text: loserRating"></span>)</small></li>
+        </ul>
+      </div>
+    </div>
+    
   </div>
     
 
